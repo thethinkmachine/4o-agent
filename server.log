@@ -1,0 +1,201 @@
+2025-02-14 23:21:56,535 - ERROR - Error executing task.
+Traceback (most recent call last):
+  File "/home/shrey/Documents/4o-agent/app.py", line 142, in run_task
+    result = await run_in_threadpool(agent.run, task.task)
+  File "/home/shrey/aistack/lib/python3.10/site-packages/starlette/concurrency.py", line 37, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+  File "/home/shrey/aistack/lib/python3.10/site-packages/anyio/to_thread.py", line 56, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+  File "/home/shrey/aistack/lib/python3.10/site-packages/anyio/_backends/_asyncio.py", line 2461, in run_sync_in_worker_thread
+    return await future
+  File "/home/shrey/aistack/lib/python3.10/site-packages/anyio/_backends/_asyncio.py", line 962, in run
+    result = context.run(func, *args)
+  File "/home/shrey/aistack/lib/python3.10/site-packages/langchain_core/_api/deprecation.py", line 181, in warning_emitting_wrapper
+    return wrapped(*args, **kwargs)
+  File "/home/shrey/aistack/lib/python3.10/site-packages/langchain/chains/base.py", line 606, in run
+    return self(args[0], callbacks=callbacks, tags=tags, metadata=metadata)[
+  File "/home/shrey/aistack/lib/python3.10/site-packages/langchain_core/_api/deprecation.py", line 181, in warning_emitting_wrapper
+    return wrapped(*args, **kwargs)
+  File "/home/shrey/aistack/lib/python3.10/site-packages/langchain/chains/base.py", line 389, in __call__
+    return self.invoke(
+  File "/home/shrey/aistack/lib/python3.10/site-packages/langchain/chains/base.py", line 170, in invoke
+    raise e
+  File "/home/shrey/aistack/lib/python3.10/site-packages/langchain/chains/base.py", line 160, in invoke
+    self._call(inputs, run_manager=run_manager)
+  File "/home/shrey/aistack/lib/python3.10/site-packages/langchain/agents/agent.py", line 1624, in _call
+    next_step_output = self._take_next_step(
+  File "/home/shrey/aistack/lib/python3.10/site-packages/langchain/agents/agent.py", line 1330, in _take_next_step
+    [
+  File "/home/shrey/aistack/lib/python3.10/site-packages/langchain/agents/agent.py", line 1330, in <listcomp>
+    [
+  File "/home/shrey/aistack/lib/python3.10/site-packages/langchain/agents/agent.py", line 1358, in _iter_next_step
+    output = self._action_agent.plan(
+  File "/home/shrey/aistack/lib/python3.10/site-packages/langchain/agents/agent.py", line 804, in plan
+    full_output = self.llm_chain.predict(callbacks=callbacks, **full_inputs)
+  File "/home/shrey/aistack/lib/python3.10/site-packages/langchain/chains/llm.py", line 318, in predict
+    return self(kwargs, callbacks=callbacks)[self.output_key]
+  File "/home/shrey/aistack/lib/python3.10/site-packages/langchain_core/_api/deprecation.py", line 181, in warning_emitting_wrapper
+    return wrapped(*args, **kwargs)
+  File "/home/shrey/aistack/lib/python3.10/site-packages/langchain/chains/base.py", line 389, in __call__
+    return self.invoke(
+  File "/home/shrey/aistack/lib/python3.10/site-packages/langchain/chains/base.py", line 170, in invoke
+    raise e
+  File "/home/shrey/aistack/lib/python3.10/site-packages/langchain/chains/base.py", line 160, in invoke
+    self._call(inputs, run_manager=run_manager)
+  File "/home/shrey/aistack/lib/python3.10/site-packages/langchain/chains/llm.py", line 126, in _call
+    response = self.generate([inputs], run_manager=run_manager)
+  File "/home/shrey/aistack/lib/python3.10/site-packages/langchain/chains/llm.py", line 138, in generate
+    return self.llm.generate_prompt(
+  File "/home/shrey/aistack/lib/python3.10/site-packages/langchain_core/language_models/chat_models.py", line 860, in generate_prompt
+    return self.generate(prompt_messages, stop=stop, callbacks=callbacks, **kwargs)
+  File "/home/shrey/aistack/lib/python3.10/site-packages/langchain_core/language_models/chat_models.py", line 690, in generate
+    self._generate_with_cache(
+  File "/home/shrey/aistack/lib/python3.10/site-packages/langchain_core/language_models/chat_models.py", line 925, in _generate_with_cache
+    result = self._generate(
+  File "/home/shrey/aistack/lib/python3.10/site-packages/langchain_openai/chat_models/base.py", line 792, in _generate
+    response = self.client.create(**payload)
+  File "/home/shrey/aistack/lib/python3.10/site-packages/openai/_utils/_utils.py", line 279, in wrapper
+    return func(*args, **kwargs)
+  File "/home/shrey/aistack/lib/python3.10/site-packages/openai/resources/chat/completions.py", line 863, in create
+    return self._post(
+  File "/home/shrey/aistack/lib/python3.10/site-packages/openai/_base_client.py", line 1290, in post
+    return cast(ResponseT, self.request(cast_to, opts, stream=stream, stream_cls=stream_cls))
+  File "/home/shrey/aistack/lib/python3.10/site-packages/openai/_base_client.py", line 967, in request
+    return self._request(
+  File "/home/shrey/aistack/lib/python3.10/site-packages/openai/_base_client.py", line 1071, in _request
+    raise self._make_status_error_from_response(err.response) from None
+openai.AuthenticationError: Error code: 401 - {'error': {'message': 'Your authentication token is not from a valid issuer.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_issuer'}}
+2025-02-14 23:22:06,904 - ERROR - Error executing task.
+Traceback (most recent call last):
+  File "/home/shrey/Documents/4o-agent/app.py", line 142, in run_task
+    result = await run_in_threadpool(agent.run, task.task)
+  File "/home/shrey/aistack/lib/python3.10/site-packages/starlette/concurrency.py", line 37, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+  File "/home/shrey/aistack/lib/python3.10/site-packages/anyio/to_thread.py", line 56, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+  File "/home/shrey/aistack/lib/python3.10/site-packages/anyio/_backends/_asyncio.py", line 2461, in run_sync_in_worker_thread
+    return await future
+  File "/home/shrey/aistack/lib/python3.10/site-packages/anyio/_backends/_asyncio.py", line 962, in run
+    result = context.run(func, *args)
+  File "/home/shrey/aistack/lib/python3.10/site-packages/langchain_core/_api/deprecation.py", line 181, in warning_emitting_wrapper
+    return wrapped(*args, **kwargs)
+  File "/home/shrey/aistack/lib/python3.10/site-packages/langchain/chains/base.py", line 606, in run
+    return self(args[0], callbacks=callbacks, tags=tags, metadata=metadata)[
+  File "/home/shrey/aistack/lib/python3.10/site-packages/langchain_core/_api/deprecation.py", line 181, in warning_emitting_wrapper
+    return wrapped(*args, **kwargs)
+  File "/home/shrey/aistack/lib/python3.10/site-packages/langchain/chains/base.py", line 389, in __call__
+    return self.invoke(
+  File "/home/shrey/aistack/lib/python3.10/site-packages/langchain/chains/base.py", line 170, in invoke
+    raise e
+  File "/home/shrey/aistack/lib/python3.10/site-packages/langchain/chains/base.py", line 160, in invoke
+    self._call(inputs, run_manager=run_manager)
+  File "/home/shrey/aistack/lib/python3.10/site-packages/langchain/agents/agent.py", line 1624, in _call
+    next_step_output = self._take_next_step(
+  File "/home/shrey/aistack/lib/python3.10/site-packages/langchain/agents/agent.py", line 1330, in _take_next_step
+    [
+  File "/home/shrey/aistack/lib/python3.10/site-packages/langchain/agents/agent.py", line 1330, in <listcomp>
+    [
+  File "/home/shrey/aistack/lib/python3.10/site-packages/langchain/agents/agent.py", line 1358, in _iter_next_step
+    output = self._action_agent.plan(
+  File "/home/shrey/aistack/lib/python3.10/site-packages/langchain/agents/agent.py", line 804, in plan
+    full_output = self.llm_chain.predict(callbacks=callbacks, **full_inputs)
+  File "/home/shrey/aistack/lib/python3.10/site-packages/langchain/chains/llm.py", line 318, in predict
+    return self(kwargs, callbacks=callbacks)[self.output_key]
+  File "/home/shrey/aistack/lib/python3.10/site-packages/langchain_core/_api/deprecation.py", line 181, in warning_emitting_wrapper
+    return wrapped(*args, **kwargs)
+  File "/home/shrey/aistack/lib/python3.10/site-packages/langchain/chains/base.py", line 389, in __call__
+    return self.invoke(
+  File "/home/shrey/aistack/lib/python3.10/site-packages/langchain/chains/base.py", line 170, in invoke
+    raise e
+  File "/home/shrey/aistack/lib/python3.10/site-packages/langchain/chains/base.py", line 160, in invoke
+    self._call(inputs, run_manager=run_manager)
+  File "/home/shrey/aistack/lib/python3.10/site-packages/langchain/chains/llm.py", line 126, in _call
+    response = self.generate([inputs], run_manager=run_manager)
+  File "/home/shrey/aistack/lib/python3.10/site-packages/langchain/chains/llm.py", line 138, in generate
+    return self.llm.generate_prompt(
+  File "/home/shrey/aistack/lib/python3.10/site-packages/langchain_core/language_models/chat_models.py", line 860, in generate_prompt
+    return self.generate(prompt_messages, stop=stop, callbacks=callbacks, **kwargs)
+  File "/home/shrey/aistack/lib/python3.10/site-packages/langchain_core/language_models/chat_models.py", line 690, in generate
+    self._generate_with_cache(
+  File "/home/shrey/aistack/lib/python3.10/site-packages/langchain_core/language_models/chat_models.py", line 925, in _generate_with_cache
+    result = self._generate(
+  File "/home/shrey/aistack/lib/python3.10/site-packages/langchain_openai/chat_models/base.py", line 792, in _generate
+    response = self.client.create(**payload)
+  File "/home/shrey/aistack/lib/python3.10/site-packages/openai/_utils/_utils.py", line 279, in wrapper
+    return func(*args, **kwargs)
+  File "/home/shrey/aistack/lib/python3.10/site-packages/openai/resources/chat/completions.py", line 863, in create
+    return self._post(
+  File "/home/shrey/aistack/lib/python3.10/site-packages/openai/_base_client.py", line 1290, in post
+    return cast(ResponseT, self.request(cast_to, opts, stream=stream, stream_cls=stream_cls))
+  File "/home/shrey/aistack/lib/python3.10/site-packages/openai/_base_client.py", line 967, in request
+    return self._request(
+  File "/home/shrey/aistack/lib/python3.10/site-packages/openai/_base_client.py", line 1071, in _request
+    raise self._make_status_error_from_response(err.response) from None
+openai.AuthenticationError: Error code: 401 - {'error': {'message': 'Your authentication token is not from a valid issuer.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_issuer'}}
+2025-02-14 23:23:47,728 - ERROR - Error executing task.
+Traceback (most recent call last):
+  File "/home/shrey/Documents/4o-agent/app.py", line 142, in run_task
+    result = await run_in_threadpool(agent.run, task.task)
+  File "/home/shrey/aistack/lib/python3.10/site-packages/starlette/concurrency.py", line 37, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+  File "/home/shrey/aistack/lib/python3.10/site-packages/anyio/to_thread.py", line 56, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+  File "/home/shrey/aistack/lib/python3.10/site-packages/anyio/_backends/_asyncio.py", line 2461, in run_sync_in_worker_thread
+    return await future
+  File "/home/shrey/aistack/lib/python3.10/site-packages/anyio/_backends/_asyncio.py", line 962, in run
+    result = context.run(func, *args)
+  File "/home/shrey/aistack/lib/python3.10/site-packages/langchain_core/_api/deprecation.py", line 181, in warning_emitting_wrapper
+    return wrapped(*args, **kwargs)
+  File "/home/shrey/aistack/lib/python3.10/site-packages/langchain/chains/base.py", line 606, in run
+    return self(args[0], callbacks=callbacks, tags=tags, metadata=metadata)[
+  File "/home/shrey/aistack/lib/python3.10/site-packages/langchain_core/_api/deprecation.py", line 181, in warning_emitting_wrapper
+    return wrapped(*args, **kwargs)
+  File "/home/shrey/aistack/lib/python3.10/site-packages/langchain/chains/base.py", line 389, in __call__
+    return self.invoke(
+  File "/home/shrey/aistack/lib/python3.10/site-packages/langchain/chains/base.py", line 170, in invoke
+    raise e
+  File "/home/shrey/aistack/lib/python3.10/site-packages/langchain/chains/base.py", line 160, in invoke
+    self._call(inputs, run_manager=run_manager)
+  File "/home/shrey/aistack/lib/python3.10/site-packages/langchain/agents/agent.py", line 1624, in _call
+    next_step_output = self._take_next_step(
+  File "/home/shrey/aistack/lib/python3.10/site-packages/langchain/agents/agent.py", line 1330, in _take_next_step
+    [
+  File "/home/shrey/aistack/lib/python3.10/site-packages/langchain/agents/agent.py", line 1330, in <listcomp>
+    [
+  File "/home/shrey/aistack/lib/python3.10/site-packages/langchain/agents/agent.py", line 1358, in _iter_next_step
+    output = self._action_agent.plan(
+  File "/home/shrey/aistack/lib/python3.10/site-packages/langchain/agents/agent.py", line 804, in plan
+    full_output = self.llm_chain.predict(callbacks=callbacks, **full_inputs)
+  File "/home/shrey/aistack/lib/python3.10/site-packages/langchain/chains/llm.py", line 318, in predict
+    return self(kwargs, callbacks=callbacks)[self.output_key]
+  File "/home/shrey/aistack/lib/python3.10/site-packages/langchain_core/_api/deprecation.py", line 181, in warning_emitting_wrapper
+    return wrapped(*args, **kwargs)
+  File "/home/shrey/aistack/lib/python3.10/site-packages/langchain/chains/base.py", line 389, in __call__
+    return self.invoke(
+  File "/home/shrey/aistack/lib/python3.10/site-packages/langchain/chains/base.py", line 170, in invoke
+    raise e
+  File "/home/shrey/aistack/lib/python3.10/site-packages/langchain/chains/base.py", line 160, in invoke
+    self._call(inputs, run_manager=run_manager)
+  File "/home/shrey/aistack/lib/python3.10/site-packages/langchain/chains/llm.py", line 126, in _call
+    response = self.generate([inputs], run_manager=run_manager)
+  File "/home/shrey/aistack/lib/python3.10/site-packages/langchain/chains/llm.py", line 138, in generate
+    return self.llm.generate_prompt(
+  File "/home/shrey/aistack/lib/python3.10/site-packages/langchain_core/language_models/chat_models.py", line 860, in generate_prompt
+    return self.generate(prompt_messages, stop=stop, callbacks=callbacks, **kwargs)
+  File "/home/shrey/aistack/lib/python3.10/site-packages/langchain_core/language_models/chat_models.py", line 690, in generate
+    self._generate_with_cache(
+  File "/home/shrey/aistack/lib/python3.10/site-packages/langchain_core/language_models/chat_models.py", line 925, in _generate_with_cache
+    result = self._generate(
+  File "/home/shrey/aistack/lib/python3.10/site-packages/langchain_openai/chat_models/base.py", line 792, in _generate
+    response = self.client.create(**payload)
+  File "/home/shrey/aistack/lib/python3.10/site-packages/openai/_utils/_utils.py", line 279, in wrapper
+    return func(*args, **kwargs)
+  File "/home/shrey/aistack/lib/python3.10/site-packages/openai/resources/chat/completions.py", line 863, in create
+    return self._post(
+  File "/home/shrey/aistack/lib/python3.10/site-packages/openai/_base_client.py", line 1290, in post
+    return cast(ResponseT, self.request(cast_to, opts, stream=stream, stream_cls=stream_cls))
+  File "/home/shrey/aistack/lib/python3.10/site-packages/openai/_base_client.py", line 967, in request
+    return self._request(
+  File "/home/shrey/aistack/lib/python3.10/site-packages/openai/_base_client.py", line 1071, in _request
+    raise self._make_status_error_from_response(err.response) from None
+openai.AuthenticationError: Error code: 401 - {'error': {'message': 'Your authentication token is not from a valid issuer.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_issuer'}}
