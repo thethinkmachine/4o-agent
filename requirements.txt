@@ -1,0 +1,12 @@
+openai
+pydantic
+pathlib
+requests
+httpx
+pandas
+numpy
+fastapi
+uvicorn
+langchain
+langchain-openai
+langchain-community

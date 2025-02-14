@@ -4,33 +4,37 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+USE_FALLBACK_API = False
+
 class APIConfig:
     """
-    A class to manage the configuration and testing of API endpoints for chat and embeddings.
+    A class to manage API configurations for both primary and fallback endpoints.
     """
-
-    def __init__(self) -> None:
+    def __init__(self, use_fallback: bool = False) -> None:
         """
-        Initializes APIConfig with default settings for chat and embedding endpoints.
+        Initialize with either primary or fallback configuration based on flag.
         """
-        self.ai_proxy_token: str = os.getenv("AIPROXY_TOKEN")
-        self.chat_endpoint: str = "http://aiproxy.sanand.workers.dev/openai/v1/chat/completions"
-        self.chat_model: str = "gpt-4o-mini"
-        self.embedding_endpoint: str = "http://aiproxy.sanand.workers.dev/openai/v1/embeddings"
-        self.embedding_model: str = "text-embedding-3-small"
+        if use_fallback:
+            # Fallback configuration (OpenAI)
+            self.auth_token = os.getenv("OPENAI_API_KEY")
+            self.inference_endpoint = "https://api.openai.com/v1/"
+        else:
+            # Primary configuration (Custom Proxy)
+            self.auth_token = os.getenv("AIPROXY_TOKEN")
+            self.inference_endpoint = "http://aiproxy.sanand.workers.dev/openai/v1/"
+            
+        self.chat_model = "gpt-4o-mini"
+        self.embedding_model = "text-embedding-3-small"
 
-    def test_chat_endpoint(self) -> str:
+    def _test_chat_endpoint(self) -> str:
         """
-        Tests the chat endpoint by sending a request and checking the response.
-
-        Returns:
-            str: The result of the chat endpoint test.
+        Tests the chat endpoint for the active configuration.
         """
         try:
             response = httpx.post(
-                self.chat_endpoint,
+                f"{self.inference_endpoint}chat/completions",
                 headers={
-                    "Authorization": f"Bearer {self.ai_proxy_token}",
+                    "Authorization": f"Bearer {self.auth_token}",
                     "Content-Type": "application/json",
                 },
                 json={
@@ -44,21 +48,18 @@ class APIConfig:
             response.raise_for_status()
             return "-> Chat Endpoint Test OK ✅"
         except Exception as e:
-            print("❌ An exception occurred:")
+            print("❌ Chat endpoint exception:")
             return str(e)
 
-    def test_embedding_endpoint(self) -> str:
+    def _test_embedding_endpoint(self) -> str:
         """
-        Tests the embedding endpoint by sending a request and checking the response.
-
-        Returns:
-            str: The result of the embedding endpoint test.
+        Tests the embedding endpoint for the active configuration.
         """
         try:
             response = httpx.post(
-                self.embedding_endpoint,
+                f"{self.inference_endpoint}embeddings",
                 headers={
-                    "Authorization": f"Bearer {self.ai_proxy_token}",
+                    "Authorization": f"Bearer {self.auth_token}",
                     "Content-Type": "application/json",
                 },
                 json={
@@ -69,11 +70,11 @@ class APIConfig:
             response.raise_for_status()
             return "-> Embeddings Endpoint Test OK ✅"
         except Exception as e:
-            print("❌ An exception occurred:")
+            print("❌ Embedding endpoint exception:")
             return str(e)
 
 if __name__ == "__main__":
-    config = APIConfig()
-    print("Testing API Endpoints")
-    print(config.test_chat_endpoint())
-    print(config.test_embedding_endpoint())
+    api_config = APIConfig(use_fallback=USE_FALLBACK_API)
+    print(f"Testing {'Fallback' if USE_FALLBACK_API else 'Primary'} API:")
+    print(api_config._test_chat_endpoint())
+    print(api_config._test_embedding_endpoint())
