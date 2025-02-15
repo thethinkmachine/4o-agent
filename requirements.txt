@@ -16,3 +16,4 @@ tabula-py
 uvicorn
 python-dotenv
 cssselect
+datetime
