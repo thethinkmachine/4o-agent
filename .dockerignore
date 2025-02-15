@@ -20,3 +20,4 @@ yarn-error.log
 dist/
 build/
 .DS_Store
+server.log
