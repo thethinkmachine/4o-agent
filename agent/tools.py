@@ -33,6 +33,7 @@ from langchain_experimental.utilities import PythonREPL
 from urllib.parse import urlparse
 from enum import Enum
 from duckduckgo_search import DDGS
+from dateutil.parser import parse
 
 # -----------------------
 # Pydantic Schemas
@@ -83,6 +84,10 @@ class APICallInput(BaseModel):
 class RunPythonFileInput(BaseModel):
     code: str = Field(..., description="Python code to run.")
 
+class CountDatesByDayInput(BaseModel):
+    date_list: List[str] = Field(..., description="List of date strings in various formats (e.g., '2022-01-01', '2003/08/11 08:04:00', '13-Nov-2005' etc).")
+    day_str: str = Field(..., description="The target day (e.g., 'mon', 'tue', 'wed', etc.).")
+
 class ScrapeWebsiteInput(BaseModel):
     url: str = Field(..., description="The website URL to scrape. Example: 'https://example.com'."),
     headers: Optional[Dict[str, str]] = Field(None, description="Custom headers (default: User-Agent)."),
@@ -99,11 +104,16 @@ class ScrapeWebsiteInput(BaseModel):
         None, description="List of HTML tags to extract from the page. Example: ['div', 'a', 'p']."
     )
 
+class ContactSortInput(BaseModel):
+    input_file: str = Field(..., description="Path to the input JSON file containing contacts.")
+    output_file: str = Field(..., description="Path where the sorted contacts JSON file will be written.")
+
 class SearchType(str, Enum):
     WEB = "web"
     IMAGES = "images"
     VIDEOS = "videos"
     NEWS = "news"
+
 class DuckDuckGoSearchInput(BaseModel):
     query: str = Field(..., description="Search query string")
     search_type: SearchType = Field(
@@ -238,6 +248,73 @@ def image_to_text(image_path: str) -> str:
     Returns: str: Extracted text
     """
     return pytesseract.image_to_string(Image.open(image_path))
+
+@tool(args_schema=CountDatesByDayInput)
+def count_dates_by_day(date_list, day_str):
+    """
+    Count the number of dates in the list that fall on the specified day.
+    
+    Args:
+        date_list (list of str): List of date strings in various formats.
+        day_str (str): The target day (e.g., "mon", "tue", "wed", etc.).
+        
+    Returns:
+        int: Count of dates that fall on the specified day.
+    """
+    # Normalize the input day string to a three-letter abbreviation
+    day_str = day_str.lower()[:3]
+    
+    # Map three-letter abbreviations to Python's weekday numbering (Monday=0, Sunday=6)
+    day_map = {"mon": 0, "tue": 1, "wed": 2, "thu": 3, "fri": 4, "sat": 5, "sun": 6}
+    target_weekday = day_map.get(day_str)
+    
+    if target_weekday is None:
+        raise ValueError(f"Invalid day provided: {day_str}. Use mon, tue, wed, thu, fri, sat, or sun.")
+    
+    count = 0
+    for date_str in date_list:
+        try:
+            # Parse the date string using dateutil's robust parser
+            dt = parse(date_str)
+            if dt.weekday() == target_weekday:
+                count += 1
+        except Exception as e:
+            # If a date string can't be parsed, skip it (or log the error if needed)
+            print(f"Warning: Could not parse '{date_str}'. Error: {e}")
+            continue
+    return count
+
+@tool(args_schema=ContactSortInput)
+def sort_contacts(input_file: str, output_file: str) -> None:
+    """
+    Read contacts from a JSON file, sort them by last name then first name,
+    and write the sorted contacts back to a new JSON file.
+
+    Args:
+        input_file (str): Path to the input JSON file containing contacts.
+        output_file (str): Path where the sorted contacts JSON file will be written.
+    """
+    try:
+        # Read the contacts from the input file
+        with open(input_file, 'r') as f:
+            contacts = json.load(f)
+        
+        # Sort the contacts by last_name then first_name (case-insensitive)
+        sorted_contacts = sorted(
+            contacts, 
+            key=lambda contact: (
+                contact.get("last_name", "").lower(),
+                contact.get("first_name", "").lower()
+            )
+        )
+        
+        # Write the sorted contacts to the output file with indentation for readability
+        with open(output_file, 'w') as f:
+            json.dump(sorted_contacts, f, indent=4)
+            
+        print(f"Sorted contacts have been written to '{output_file}'.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
 
 @tool(args_schema=SQLQueryInput)
 def sql_executor(db_path: str, query: str) -> List[Dict]:
@@ -456,5 +533,5 @@ def duckduckgo_search(query: str, search_type: SearchType = SearchType.WEB, max_
         return f"Search error: {str(e)}"
 
 if __name__ == "__main__":
-    for tool in [run_shell_command, python_repl, run_python_file, scrape_pdf_tabula, image_to_text, sql_executor, csv_to_json, md_to_html, make_api_call, scrape_website, install_uv_package]:
+    for tool in [run_shell_command, count_dates_by_day, python_repl, run_python_file, scrape_pdf_tabula, image_to_text, sql_executor, csv_to_json, md_to_html, make_api_call, scrape_website, install_uv_package]:
         print(f"Name: {tool.name}")
