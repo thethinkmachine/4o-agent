@@ -1,79 +1,100 @@
 import os
 import httpx
 from dotenv import load_dotenv
+
 load_dotenv(override=True)
 
-USE_FALLBACK_API = os.getenv("USE_FALLBACK_API", "false").lower() in ('true', '1', 'yes')
+"""
+Environment variables:
+- AIPROXY_TOKEN: API Proxy token.
+- USE_CUSTOM_API: If true then use custom API configuration.
+- CUSTOM_BASE_URL: Custom API base URL.
+- CUSTOM_API_KEY: Custom API key.
+- CHAT_MODEL: Chat model name.
+- EMBEDDING_MODEL: Embedding model name.
+"""
+
+# API configuration constants
+USE_CUSTOM_API = os.getenv("USE_CUSTOM_API", "false").lower() in ('true', '1', 'yes') # If true then use below given configuration
+CUSTOM_BASE_URL = os.getenv("CUSTOM_BASE_URL", "https://api.openai.com/v1/")
+CUSTOM_API_KEY = os.getenv("CUSTOM_API_KEY")
+
+# Backend model configuration
+CHAT_MODEL = os.getenv("CHAT_MODEL", "gpt-4o-mini")
+EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "text-embedding-3-small")
+
 
 class APIConfig:
     """
-    A class to manage API configurations for both primary and fallback endpoints.
+    Manages API configurations for both primary and custom endpoints.
     """
     def __init__(self) -> None:
-        """
-        Initialize with either primary or fallback configuration based on flag.
-        """
-        if USE_FALLBACK_API:
-            # Fallback configuration (OpenAI)
-            self.auth_token = os.getenv("OPENAI_API_KEY")
-            self.inference_endpoint = "https://api.openai.com/v1/"
+        if not USE_CUSTOM_API:
+            self.inference_endpoint = "https://aiproxy.sanand.workers.dev/openai/v1/" # Primary API endpoint
+            self.auth_token = os.getenv("AIPROXY_TOKEN") # Primary API auth token
         else:
-            # Primary configuration (Custom Proxy API)
-            self.auth_token = os.getenv("AIPROXY_TOKEN")
-            self.inference_endpoint = "http://aiproxy.sanand.workers.dev/openai/v1/"
+            self.inference_endpoint = CUSTOM_BASE_URL
+            self.auth_token = CUSTOM_API_KEY
+            os.environ["CUSTOM_FLAG"] = "1"
 
-        self.chat_model = "gpt-4o-mini"
-        self.embedding_model = "text-embedding-3-small"
+        self.chat_model = CHAT_MODEL
+        self.embedding_model = EMBEDDING_MODEL
 
     def _test_chat_endpoint(self) -> str:
         """
-        Tests the chat endpoint for the active configuration.
+        Tests the chat endpoint.
         """
+        url = f"{self.inference_endpoint.rstrip('/')}/chat/completions"
+        headers = {
+            "Authorization": f"Bearer {self.auth_token}",
+            "Content-Type": "application/json",
+        }
+        payload = {
+            "model": self.chat_model,
+            "messages": [
+                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "user", "content": "What is your name?"},
+            ],
+        }
         try:
-            response = httpx.post(
-                f"{self.inference_endpoint}chat/completions",
-                headers={
-                    "Authorization": f"Bearer {self.auth_token}",
-                    "Content-Type": "application/json",
-                },
-                json={
-                    "model": self.chat_model,
-                    "messages": [
-                        {"role": "system", "content": "You are a helpful assistant."},
-                        {"role": "user", "content": "What is your name?"},
-                    ],
-                },
-            )
+            print(f"POST {url}")
+            response = httpx.post(url, headers=headers, json=payload)
             response.raise_for_status()
-            return "-> Chat Endpoint Test OK ✅"
-        except Exception as e:
-            print("❌ Chat endpoint exception:")
-            return str(e)
+            return "🟢 Chat Endpoint Test: OK ✅"
+        except httpx.HTTPStatusError as http_err:
+            print("🔴 Chat Endpoint Test: FAILED ❌")
+            return str(http_err)
+        except httpx.RequestError as req_err:
+            print("🟡 Chat Endpoint Test: Timeout ⌛")
+            return str(req_err)
 
     def _test_embedding_endpoint(self) -> str:
         """
-        Tests the embedding endpoint for the active configuration.
+        Tests the embedding endpoint.
         """
+        url = f"{self.inference_endpoint.rstrip('/')}/embeddings"
+        headers = {
+            "Authorization": f"Bearer {self.auth_token}",
+            "Content-Type": "application/json",
+        }
+        payload = {
+            "model": self.embedding_model,
+            "input": "What is your name?",
+        }
         try:
-            response = httpx.post(
-                f"{self.inference_endpoint}embeddings",
-                headers={
-                    "Authorization": f"Bearer {self.auth_token}",
-                    "Content-Type": "application/json",
-                },
-                json={
-                    "model": self.embedding_model,
-                    "input": ["1+1", "How are you?"],
-                },
-            )
+            print(f"POST {url}")
+            response = httpx.post(url, headers=headers, json=payload)
             response.raise_for_status()
-            return "-> Embeddings Endpoint Test OK ✅"
-        except Exception as e:
-            print("❌ Embedding endpoint exception:")
-            return str(e)
+            return "🟢 Embedding Endpoint Test: OK ✅"
+        except httpx.HTTPStatusError as http_err:
+            print("🔴 Embedding Endpoint Test: FAILED ❌")
+            return str(http_err)
+        except httpx.RequestError as req_err:
+            print("🟡 Embedding Endpoint Test: Timeout ⌛")
+            return str(req_err)
 
 if __name__ == "__main__":
     api_config = APIConfig()
-    print(f"Testing {'Fallback (OpenAI)' if USE_FALLBACK_API else 'Primary (AIProxy)'} API:")
+    print(f"🧪 Testing {'Custom' if USE_CUSTOM_API else 'Primary'} API:")
     print(api_config._test_chat_endpoint())
     print(api_config._test_embedding_endpoint())
