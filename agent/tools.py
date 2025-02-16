@@ -239,16 +239,6 @@ def scrape_pdf_tabula(file_path: str) -> str:
     except Exception as e:
         return f"Error scraping PDF: {e}"
 
-@tool(args_schema=ImageToTextInput)
-def image_to_text(image_path: str) -> str:
-    """
-    Extract text from an image using OCR.
-    
-    Args: image_path (str): Path to image file
-    Returns: str: Extracted text
-    """
-    return pytesseract.image_to_string(Image.open(image_path))
-
 @tool(args_schema=CountDatesByDayInput)
 def count_dates_by_day(date_list, day_str):
     """
@@ -533,5 +523,5 @@ def duckduckgo_search(query: str, search_type: SearchType = SearchType.WEB, max_
         return f"Search error: {str(e)}"
 
 if __name__ == "__main__":
-    for tool in [run_shell_command, count_dates_by_day, python_repl, run_python_file, scrape_pdf_tabula, image_to_text, sql_executor, csv_to_json, md_to_html, make_api_call, scrape_website, install_uv_package]:
+    for tool in [run_shell_command, count_dates_by_day, python_repl, run_python_file, scrape_pdf_tabula, sql_executor, csv_to_json, md_to_html, make_api_call, scrape_website, install_uv_package]:
         print(f"Name: {tool.name}")

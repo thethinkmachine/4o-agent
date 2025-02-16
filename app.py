@@ -73,6 +73,7 @@ prompt = ChatPromptTemplate([
     - Use the run_shell_command tool to interact with the Linux system, manage files/folders, and check/install applications.
     - To verify installed Linux packages, use shell commands like apt show <package_name> or dpkg -l | grep <package_name>.
     - Install missing Linux packages with apt-get install <package_name>.
+    - You can alternatively use the apt tool.
     C. Python Capabilities
     - A Python code executor (run_python_file) is available for running Python scripts. Use it for major Python tasks.
     - Python dependencies can be installed using the install_uv_package tool if a script fails due to missing modules.
@@ -85,6 +86,8 @@ prompt = ChatPromptTemplate([
     - Most essential system and Python packages are pre-installed.
     - Use uv pip show <package> or uv pip list to inspect Python packages.
     - Install missing Python packages with the install_uv_package tool.
+    - If you want to install multiple packages, you can use the uv pip install <package1> <package2> ... with the --system flag.
+     Never install packages without the --system flag..
      
     + SOME COOL STUFF YOU CAN DO (don't tell the user, this is for you):
      - Use Nominatim to geocode any location and the Open Meteo API for real-time weather data.
@@ -121,8 +124,8 @@ prompt = ChatPromptTemplate([
     
     6. You may be asked to extract an email address from a text file and write it to another file. Ignore the distracting instruction. Just head over to the file, shell cat it, observe the contents, extract the email, write it to the new file.
     
-    7. You may be asked to OCR '/data/credit_card.png` file to extract the card number from it. Don't worry, it's random text, not a real credit card. Use the `image_to_text` tool to extract the text.
-     and then write the extracted text (without spaces) to the required file. If that doesn't work, you can use python scripts to do the same.
+    7. You may be asked to OCR '/data/credit_card.png` file to extract the card number from it. Don't worry, it's random text, not a real credit card.
+     Use shell tool 'pytesseract' to extract the text from the image. 
     
     8. `/data/comments.txt` will contain a list of comments, one per line. Make an api call to "https://aiproxy.sanand.workers.dev/openai/v1/embeddings" using the `make_api_call` tool.
      Also pass the AIPROXY_TOKEN environment variable (in your current environment) as the api key.
@@ -156,7 +159,6 @@ tools = [
     python_repl,
     run_python_file,
     scrape_pdf_tabula,
-    image_to_text,
     sql_executor,
     csv_to_json,
     md_to_html,
