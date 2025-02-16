@@ -456,5 +456,5 @@ def duckduckgo_search(query: str, search_type: SearchType = SearchType.WEB, max_
         return f"Search error: {str(e)}"
 
 if __name__ == "__main__":
-    for tool in [file_cut, file_copypaste, file_delete, run_shell_command, python_repl, run_python_file, scrape_pdf_tabula, image_to_text, sql_executor, csv_to_json, md_to_html, make_api_call, scrape_website, install_uv_package]:
+    for tool in [run_shell_command, python_repl, run_python_file, scrape_pdf_tabula, image_to_text, sql_executor, csv_to_json, md_to_html, make_api_call, scrape_website, install_uv_package]:
         print(f"Name: {tool.name}")
