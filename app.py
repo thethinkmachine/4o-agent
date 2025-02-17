@@ -5,11 +5,13 @@ import uvicorn
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
 
+# FastAPI everything
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import PlainTextResponse
 from fastapi.concurrency import run_in_threadpool
 
+# Langchain everything
 from langchain import hub
 from langchain_openai import ChatOpenAI
 from langchain.agents import AgentType, initialize_agent, AgentExecutor, create_openai_tools_agent
@@ -17,6 +19,7 @@ from langchain.memory import ConversationBufferMemory
 from langchain_core.messages import AIMessage, HumanMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 
+# Agent everything
 from agent.config import APIConfig
 from agent.tools import *
 
@@ -246,9 +249,6 @@ async def run_task(task: str):
     except Exception as e:
         logger.exception("Execution failed!")
         raise HTTPException(status_code=500, detail=str(e))
-
-
-
 
 @app.get("/read", response_class=PlainTextResponse)
 async def read_file(path: str):
