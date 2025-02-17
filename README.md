@@ -1,6 +1,6 @@
 # 🤖 4o-Operator | A ReAct based CL-CUA
 
-4o-Operator is a fully autonomous Command Line Computer-Using Agent (CL-CUA) that leverages zero-shot ReAct principles [(ArXiv)](https://arxiv.org/abs/2210.03629) to perform tasks on your behalf. Leveraging OpenAI GPT model, it can execute shell commands, run Python code, perform web scraping, manage files, and make API calls, all within a Directed Acyclic Graph-like architecture. The agent intelligently combines outputs from various tools to achieve specified goals, offering a flexible and powerful solution for automating command-line tasks.
+**4o-Operator** is a fully autonomous Command Line Computer-Using Agent (CL-CUA) that leverages zero-shot ReAct principles [(ArXiv)](https://arxiv.org/abs/2210.03629) to perform tasks on your behalf. Leveraging OpenAI GPT model, it can execute shell commands, run Python code, perform web scraping, manage files, and make API calls, all within a Directed Acyclic Graph-like architecture. The agent intelligently combines outputs from various tools to achieve specified goals, offering a flexible and powerful solution for automating command-line tasks.
 
 ## ⭐ | Features
 
@@ -45,7 +45,7 @@
 - `CHAT_MODEL`: Chat model name (defaults to `gpt-4o-mini`).
 - `EMBEDDING_MODEL`: Embedding model name (defaults to `text-embedding-3-small`).
 
-To run the agent with your OpenAI API key:
+To run the agent using the OpenAI inferencee endpoint, using your OpenAI API key,
 
 ```bash
 docker run -it -p 8000:8000 \
@@ -59,9 +59,17 @@ Replace the placeholder values with your actual configuration.
 
 ## Usage
 
-Once the container is running, you can interact with 4o-Operator through its command-line interface. Input your commands or tasks, and the agent will autonomously determine the best approach, utilizing its suite of tools in any combination to achieve the desired outcome.
+Once the container is running, the docker image launches a local server accessible at the mapped port. The agent can be accessed through the FastAPI Swagger UI web interface located at `http://localhost:8000/docs`. go through the API documentation and explore & try out the available endpoints.
 
-## Caution
+### Available Endpoints
+The API exposes two endpoints for **POST**ing and **GET**ting stuff,
+
+- **Execute a Task**: To assign a task to the agent, send a POST request to the `/run` endpoint with the desired task as `task` query parameter. Use this to pass prompts/tasks etc.
+
+- **Read a File**: To read the contents of a file within the agent's working directory, send a GET request to the `/read` endpoint with the `path` query parameter specifying the file's path. For example: `http://localhost:8000/read?path=/data/filename.ext`. Ensure that the `path` parameter accurately reflects the file's location within the container's filesystem. You can ask the agent to help you with that if you face any difficulties accessing the files.
+- Both parameters accept only `text/plain` type payloads (for now).
+
+## ⚠️ | Caution
 
 - **Security Risks**: Running a CUA carries inherent risks, including potential prompt injections.
 - **Model Vulnerabilities**: While proprietary models like GPT-4o are designed with security in mind, using a local LLM backend may increase susceptibility to attacks.
@@ -79,4 +87,4 @@ This project is licensed under the MIT License.
 
 **Shreyan C (@thethinkmachine)**
 
-*Developed as a college project and open-sourced for the community.*
+*4o-Operator started as a college project and has been open-sourced for the community. There will be more updates in the future.*
