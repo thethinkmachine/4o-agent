@@ -232,7 +232,7 @@ app.add_middleware(
 # -----------------------
 # Endpoints
 # -----------------------
-   
+
 @app.post("/run", response_class=PlainTextResponse)
 async def run_task(task: str):
     if not task:
@@ -249,18 +249,24 @@ async def run_task(task: str):
 
 
 
+
 @app.get("/read", response_class=PlainTextResponse)
 async def read_file(path: str):
-    if not path.startswith("/"):
-        path = "/" + path
-    path = "/app" + path
-    path = Path(path).resolve()
     try:
-        with open(path, "r") as file:
-            return file.read()
-    except FileNotFoundError:
-        raise HTTPException(status_code=404, detail="File not found.")
+        current_dir = Path.cwd()
+        full_path = current_dir / path.lstrip('/')
+        
+        if not full_path.is_file():
+            raise HTTPException(status_code=404, detail="File not found")
+            
+        if not str(full_path).startswith(str(current_dir)):
+            raise HTTPException(status_code=403, detail="Access denied")
+            
+        return PlainTextResponse(full_path.read_text())
     except Exception as e:
+        if isinstance(e, HTTPException):
+            raise e
+        logger.exception("Failed to read file")
         raise HTTPException(status_code=500, detail=str(e))
 
 # -----------------------
