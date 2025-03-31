@@ -88,22 +88,6 @@ class CountDatesByDayInput(BaseModel):
     date_list: List[str] = Field(..., description="List of date strings in various formats (e.g., '2022-01-01', '2003/08/11 08:04:00', '13-Nov-2005' etc).")
     day_str: str = Field(..., description="The target day (e.g., 'mon', 'tue', 'wed', etc.).")
 
-class ScrapeWebsiteInput(BaseModel):
-    url: str = Field(..., description="The website URL to scrape. Example: 'https://example.com'."),
-    headers: Optional[Dict[str, str]] = Field(None, description="Custom headers (default: User-Agent)."),
-    element: Optional[str] = Field(None, description="CSS selector for specific elements."),
-    attr: Optional[str] = Field(None, description="Attribute to extract (if None, returns element HTML or text).")
-    
-
-    url: str = Field(..., description="The website URL to scrape. Example: 'https://example.com'.")
-    headless: bool = Field(True, description="Run the browser in headless mode. Default is True.")
-    user_agent: Optional[str] = Field(
-        None, description="Optional custom user agent (e.g., 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)')."
-    )
-    tags_to_extract: Optional[List[str]] = Field(
-        None, description="List of HTML tags to extract from the page. Example: ['div', 'a', 'p']."
-    )
-
 class ContactSortInput(BaseModel):
     input_file: str = Field(..., description="Path to the input JSON file containing contacts.")
     output_file: str = Field(..., description="Path where the sorted contacts JSON file will be written.")
@@ -423,62 +407,6 @@ def make_api_call(
         return {"error": f"Request failed: {str(e)}, {response.text}"}
     except Exception as e:
         return {"error": f"Unexpected error: {str(e)}, {response.text}"}
-    
-@tool(args_schema=ScrapeWebsiteInput)
-def scrape_website(url: str, headers: Optional[Dict[str, str]] = None, element: Optional[str] = None, attr: Optional[str] = None) -> Dict[str, Union[str, List[str]]]:
-    """
-    Scrapes a website and extracts data based on criteria. Returns complete HTML or specific element content/attributes.
-
-    Args:
-        url (str): Target URL; "http://" added if scheme missing.
-        headers (dict, optional): Custom headers (default: User-Agent).
-        element (str, optional): CSS selector for specific elements.
-        attr (str, optional): Attribute to extract (if None, returns element HTML or text).
-
-    Returns:
-        dict: {"status": "success", "data": <extracted data>} or {"status": "error", "message": <error>}
-    """
-    try:
-        # Ensure URL includes a scheme; add "http://" if missing.
-        if not urlparse(url).scheme:
-            url = "http://" + url
-    
-        # Default headers if not provided.
-        if headers is None:
-            headers = {"User-Agent": "Mozilla/5.0 (compatible; MyScraper/1.0)"}
-    
-        # Perform the HTTP GET request with timeout.
-        response = requests.get(url, headers=headers, timeout=10)
-        response.raise_for_status()  # Raise error for bad HTTP status codes.
-    
-        html_content = response.text
-    
-        # If no element is specified, return the complete HTML of the page.
-        if not element:
-            return {"status": "success", "data": html_content}
-    
-        # Otherwise, parse the HTML and extract desired elements.
-        soup = BeautifulSoup(html_content, 'html.parser')
-        selected_elements = soup.select(element)
-    
-        if not selected_elements:
-            return {"status": "error", "message": f"No elements found for selector: {element}"}
-    
-        if attr:
-            # Return list of attribute values (if the attribute exists).
-            data = [tag.get(attr) for tag in selected_elements if tag.get(attr) is not None]
-            if not data:
-                return {"status": "error", "message": f"Attribute '{attr}' not found in any elements matching: {element}"}
-        else:
-            # Return full HTML markup of each matching element.
-            data = [str(tag) for tag in selected_elements]
-    
-        return {"status": "success", "data": data}
-    
-    except requests.exceptions.RequestException as req_err:
-        return {"status": "error", "message": f"HTTP error occurred: {req_err}"}
-    except Exception as err:
-        return {"status": "error", "message": f"An unexpected error occurred: {err}"}
 
 @tool(args_schema=DuckDuckGoSearchInput)
 def duckduckgo_search(query: str, search_type: SearchType = SearchType.WEB, max_results: int = 5) -> str:
@@ -523,5 +451,5 @@ def duckduckgo_search(query: str, search_type: SearchType = SearchType.WEB, max_
         return f"Search error: {str(e)}"
 
 if __name__ == "__main__":
-    for tool in [run_shell_command, count_dates_by_day, python_repl, run_python_file, scrape_pdf_tabula, sql_executor, csv_to_json, md_to_html, make_api_call, scrape_website, install_uv_package]:
+    for tool in [run_shell_command, count_dates_by_day, python_repl, run_python_file, scrape_pdf_tabula, sql_executor, csv_to_json, md_to_html, make_api_call, install_uv_package]:
         print(f"Name: {tool.name}")

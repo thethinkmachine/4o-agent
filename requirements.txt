@@ -29,3 +29,4 @@ aiohttp
 bs4
 uvicorn
 playwright
+python-multipart
