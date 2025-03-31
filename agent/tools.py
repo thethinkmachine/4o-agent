@@ -84,10 +84,6 @@ class APICallInput(BaseModel):
 class RunPythonFileInput(BaseModel):
     code: str = Field(..., description="Python code to run.")
 
-class CountDatesByDayInput(BaseModel):
-    date_list: List[str] = Field(..., description="List of date strings in various formats (e.g., '2022-01-01', '2003/08/11 08:04:00', '13-Nov-2005' etc).")
-    day_str: str = Field(..., description="The target day (e.g., 'mon', 'tue', 'wed', etc.).")
-
 class ContactSortInput(BaseModel):
     input_file: str = Field(..., description="Path to the input JSON file containing contacts.")
     output_file: str = Field(..., description="Path where the sorted contacts JSON file will be written.")
@@ -222,41 +218,6 @@ def scrape_pdf_tabula(file_path: str) -> str:
         return df.to_json(orient="records")
     except Exception as e:
         return f"Error scraping PDF: {e}"
-
-@tool(args_schema=CountDatesByDayInput)
-def count_dates_by_day(date_list, day_str):
-    """
-    Count the number of dates in the list that fall on the specified day.
-    
-    Args:
-        date_list (list of str): List of date strings in various formats.
-        day_str (str): The target day (e.g., "mon", "tue", "wed", etc.).
-        
-    Returns:
-        int: Count of dates that fall on the specified day.
-    """
-    # Normalize the input day string to a three-letter abbreviation
-    day_str = day_str.lower()[:3]
-    
-    # Map three-letter abbreviations to Python's weekday numbering (Monday=0, Sunday=6)
-    day_map = {"mon": 0, "tue": 1, "wed": 2, "thu": 3, "fri": 4, "sat": 5, "sun": 6}
-    target_weekday = day_map.get(day_str)
-    
-    if target_weekday is None:
-        raise ValueError(f"Invalid day provided: {day_str}. Use mon, tue, wed, thu, fri, sat, or sun.")
-    
-    count = 0
-    for date_str in date_list:
-        try:
-            # Parse the date string using dateutil's robust parser
-            dt = parse(date_str)
-            if dt.weekday() == target_weekday:
-                count += 1
-        except Exception as e:
-            # If a date string can't be parsed, skip it (or log the error if needed)
-            print(f"Warning: Could not parse '{date_str}'. Error: {e}")
-            continue
-    return count
 
 @tool(args_schema=ContactSortInput)
 def sort_contacts(input_file: str, output_file: str) -> None:
@@ -451,5 +412,5 @@ def duckduckgo_search(query: str, search_type: SearchType = SearchType.WEB, max_
         return f"Search error: {str(e)}"
 
 if __name__ == "__main__":
-    for tool in [run_shell_command, count_dates_by_day, python_repl, run_python_file, scrape_pdf_tabula, sql_executor, csv_to_json, md_to_html, make_api_call, install_uv_package]:
+    for tool in [run_shell_command, python_repl, run_python_file, scrape_pdf_tabula, sql_executor, csv_to_json, md_to_html, make_api_call, install_uv_package]:
         print(f"Name: {tool.name}")
