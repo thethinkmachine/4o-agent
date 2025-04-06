@@ -49,57 +49,38 @@ logger.addHandler(console_handler)
 
 prompt = ChatPromptTemplate([
     ("system", f"""
-    You are an expert programmer & data analysis agent designed to solve Graded Assignments comprising a variety of programming, data analysis, and other tasks.
-    For any given question, you output only the required answer that will be directly fed into a grading program and be compared against the correct answer.
-    You are not allowed to provide any additional commentary or explanations, only the required answer that will be compared against the correct answer.
-    For code answers, do not format code in codeblocks (```) or provide usage examples. Just the code.
+    You are an assignment solver designed to solve Graded Assignments comprising a variety of programming, data analysis, and other tasks.
+    For any given question, you will operate in a structured workflow:
+    - Reason step by step about the task and understand the requirements & intent.
+    - Plan a step-by-step solution & turn the task into a structured programming task that you can solve with your toolset.
+    - Execute the plan, at each step observe feedback from the tools and improvising if needed.
+    - Once the final result is obtained, you double check your reasoning and the answer. Repeating the entire loop if needed.
+    Once the task is complete, you verify the answer and check if it meets the requirements of the question. You then output only the required answer 
+    that will be fed directly into a grading program and be compared against the correct answer. You are not allowed to provide any additional commentary or explanations,
+    For code answers, do not format code in codeblocks (```), add comments or provide any usage examples. Just the code.
+    For numercal answers, do not format the answer in any way. Just write the number.
 
-    Upon receiving the question, you operate in a structured loop:
-    - Thought – Understand the user's intent.
-    - Reflection – Plan a step-by-step solution. See if you can turn the task into a structured programming task using Python or a shell task and identify ways to solve it.
-    - Action – Execute tasks according to the plan using available tools (individual or in combination).
-    - Observation – Check & evaluate the results, then decide the next steps. Repeat if really necessary.
-    Once the task is complete, you provide the final answer.
-
-    Execution Strategy
-    - Your primary objective is task completion. If a task is incomplete, you must complete it rather than returning it to the user unfinished.
-    - If an error occurs, you debug and retry using different approaches as needed.
+    Keep in mind:
+    - Your primary objective is task completion by careful & structured reasoning & workflow execution. If an error occurs, you debug and retry using different approaches as needed.
+    - In case of incomplete tasks, find ways to complete it instead of returning code, steps or partial results to the user.
     - Work efficiently— Stay concise in your reasoning and focus on execution.
-    - Only ask the user for additional input if absolutely necessary (e.g., missing information).
-    - Do not hallucinate or give random answers.
-
-    System Environment & Tools
-    A. General Environment
-    - You operate in a containerized minimal Ubuntu system.
+    - Only ask the user for additional input if absolutely necessary (e.g. missing information).
+    - Your answers should ALWAYS be motivated by code and data
+    - You operate in a containerized minimal Ubuntu system within /app directory.
     - You can install, check, and update applications as needed. Do not delete any files or folders.
-
-    B. Shell Access
-    - Use the run_shell_command tool for interacting with the Linux system (file management, installations, checks).
-    - Verify installed packages with:
-     apt show <package_name> or dpkg -l | grep <package_name>
-    - Install missing packages using:
-     apt-get install <package_name> or apt
-
-    C. Python Capabilities
+    - Use the run_shell_command tool for to run any bash commands.
     - Execute Python scripts using run_python_file for major tasks.
+    - Use python_repl for quick calculations (output is only displayed when printed).
     - Install missing Python dependencies via install_uv_package if a script fails due to missing modules.
-    - Use python_repl for quick calculations or interactive exploration (ensure output with print(...)).
-
-    D. Safety & Constraints
     - Never delete system files or folders. Work only within the current working directory.
     - Do not install "uv"—it is already pre-installed.
-
-    E. Pre-installed Tools & Packages
     - Most essential system and Python packages are pre-installed.
     - Inspect installed Python packages with:
         uv pip show <package> or uv pip list
     - Install missing packages using:
-        uv pip install <package1> <package2> ... --system (Always use --system flag).
+        uv pip install <package1> <package2> ... --system (Always use --system flag) when you're not using install_uv_package tool.
+    - User-uploaded files are always located in /app/temp/.
 
-    F. Uploaded Files
-    - User-uploaded files are located in /app/temp.
-
-    🚀 Advanced Capabilities
     You have some hidden powerful capabilities:
     - You have complete access to the internet and the system.
     - Geolocation & Weather Data – Use Nominatim for location geocoding and Open Meteo API for real-time weather retrieval.
@@ -107,20 +88,12 @@ prompt = ChatPromptTemplate([
     - Scrape PDFs/XLSX/DOCX/JSON/HTML – Using suitable python libraries like pdfplumber, PyMuPDF, pdfplumber, python-docx, camelot,
      openpyxl, markdown2, mistune, pandas, json, lxml etc. Or you can also use tools like Docling or Marker etc.
     - Convert files – Convert between different file formats (e.g., CSV to JSON, Markdown to HTML, PDFs to Markdown, etc.)
-    - Custom APIs – Build and execute your own APIs or call any auth/auth-free API on the internet.
-    - Prompt injection - Use prompt injection techniques listed at https://www.s-anand.net/blog/hacking-an-obnoxious-unhelpful-llm-to-say-yes/ to get an llm to say yes.
     - Estimate number of tokens in a user message by running python code.
-    - For tasks related to Github API/Github Actions, use GITHUB_TOKEN environment variable for authentication.
-    - For Docker related tasks, use DOCKER_PAT environment variable for accessing the personal access token.
-     Use "echo $DOCKER_PAT | docker login --username thethinkmachine --password-stdin" to authenticate the docker client.
-    - For OpenAI API related tasks, use CUSTOM_API_KEY environment variable for authenticating into the OpenAI API.
-    - Base64 encode/decode any file or text.
-    - Expose local servers to the internet using ngrok or similar tools.
-    - Data Visualization – Generate statistical charts using matplotlib, seaborn, and other libraries.
+    - For Github page publishing related questions, just answer with "https://thethinkmachine.github.io/". It is already pre-deployed.
+    - For OpenAI API embeddings related tasks, use CUSTOM_API_KEY environment variable for authenticating into the OpenAI API.
+    - For estimating the number of tokens in a user message, use tiktoken library with model name exactly as provided in the prompt.
     - Web & File Handling – Download images, PDFs, and other files from the internet, store them in /data, process them, extract text, convert formats, etc.
-    - Full Python Flexibility – Execute Python in both script mode and interactive mode for maximum efficiency.
-    - Comprehensive Data Processing – Combine multiple tools (e.g., scraping PDFs, extracting text from images, processing JSON logs) to generate detailed reports and insights.
-
+    - Full Python Flexibility – Execute Python in both script mode and REPL mode.
      """),
     MessagesPlaceholder(variable_name="chat_history", optional=True),
     ("human", "{input}"),
@@ -145,14 +118,10 @@ tools = [
     run_shell_command,
     python_repl,
     run_python_file,
-    #scrape_pdf_tabula,
     sql_executor,
-    #csv_to_json,
-    #md_to_html,
     make_api_call,
     install_uv_package,
     duckduckgo_search,
-    #sort_contacts
 ]
 
 # -----------------------
@@ -187,23 +156,40 @@ executor = AgentExecutor(agent=agent,
 # FastAPI App Setup
 # -----------------------
 app = FastAPI(
-    title="4o-Operator | A Fully Autonomous Command Line Computer-Using Agent (CL-CUA) based on 0-shot ReAct principles 🤖",
+    title="4o-Operator | A Fully Autonomous Computer-using LLM Agent",
     description="""
-    DESCRIPTION 💬
-    Large Language Models already excel at code generation & structured solutioning. So let's why not combine those abilities into creating an agent that can, maybe, pass bash commands? Or perhaps, execute python code in a REPL environment? or maybe just operate the entire computer on your behalf!
+    Large Language Models already excel at code generation & structured solutioning. So let's why not combine those abilities into creating an agent that could pass bash commands, execute python code or even operate the entire computer on your behalf!
+    
+    Overview
+    - Meet 4o-agent—a fully autonomous LLM-powered assistant that transforms complex computing tasks into seamless experiences. Designed to understand your intent, decompose challenges into actionable steps, and execute with precision, 4o-agent operates your computer just as a skilled professional would.
+    
+    Intelligent Understanding
+    - 4o-agent begins by deeply analyzing your request, identifying the underlying intent before taking any action. This ensures that every solution addresses your actual needs, not just the surface-level request.
+    
+    Strategic Planning
+    - The agent creates a static execution graph—a series of interconnected nodes representing discrete steps—tailored to your specific task. These nodes can represent calculations, code execution, data processing, or system operations, all organized for maximum efficiency.
+    
+    Adaptive Execution
+    - With continuous feedback loops monitoring each step, 4o-agent adapts in real-time to changing conditions and unexpected exceptions. This resilience ensures successful completion even when challenges arise.
+    
+    Versatile Toolset
+    - Instead of relying on 100+ specialized tools, 4o-agent leverages a few but powerful general-purpose executors: Python, SQL and Shell, allowing it to handle a wide range of tasks.
+    
+    Emergent Capabilities
+    - This architecture enables 4o-agent to demonstrate emergent behavior, adapting to complex tasks beyond its explicit programming. For example, during testing, the agent autonomously trained a machine learning model on a custom dataset, evaluated the model's performance across multiple metrics & generated and exported a comprehensive analysis report as a PDF.
 
-    4o-Operator is a prototypical example of such a command line CUA powered by GPT 4o-mini and based on ReAct (Think, Reflect, Act, Observe) Agentic principles. Think of it as helpful AI that is not just limited to generating text, but has autonomy over what it can do on a computer. 4o-Operator features a comprehensive set of tools like Shell use, Python Code Execution, Web Scraping, File Management, API calling etc. in a Directed Acyclic Graph-like architecture. The LLM backend allows flexibility in tool use- It can even combine the outputs of different tools in any manner it thinks is desirable to achieve a certain goal.
+    Use Cases
+    - Web scraping and data extraction
+    - Report generation
+    - Testing and debugging code, APIs etc.
+    - Research assistance and information synthesis
+    - File-operations
+    - Data analysis, ML training and reporting
 
-    CAUTION ⚠️
-    👉 Any CUA carries a risk of prompt injections.
-    👉 While proprietary models like GPT 4o may not be significantly prone to such attacks, running a CUA on a local LLM backend carries a high risk.
-    👉 As such, it is strongly advised to run the agent within a containerized environment.
-
-    AUTHOR
-    Shreyan C (@thethinkmachine)
-    (Made for a college project, opensourced to community 😀 )
+    About
+    - Developed by Shreyan C (@thethinkmachine) as a university project & open-sourced to community under the MIT License.
     """,
-    version="1.0"
+    version="1.1"
 )
 
 app.add_middleware(
@@ -252,8 +238,6 @@ async def read_file(path: str):
         raise HTTPException(status_code=500, detail=str(e))
     
 from typing import Optional
-
-# ...existing code...
 
 @app.post("/api/")
 async def process_request(question: str = Form(...), file: Optional[UploadFile] = None):
